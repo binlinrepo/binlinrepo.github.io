@@ -8,10 +8,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="keywords" content="{{ tags | join: ',' }}">
+<meta name="description" content="{{page.excerpt | default: site.description | strip_html | strip_newlines | truncate: 128}}">
+<meta name="author" content="生如夏花">
 
 {% seo %}
 {% feed_meta %}
-
+<link rel="shortcut icon" href="/favicon.ico">
 <link rel="stylesheet" href="/assets/lib/bootstrap/css/bootstrap.min.css">
 <link rel="stylesheet" href="/assets/lib/font-awesome/4.2.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="/assets/css/site.css">
