@@ -1,0 +1,46 @@
+<section class="module-author">
+  <div class="roll clearfix">
+    <img src="/assets/img/avatar.png">
+    <header><font color="#D52B2B"><b>生</b></font><font color="#5EA25E"><b>如</b></font><font color="#DDB822"><b>夏</b></font><font color="blue"><b>花</b></font><i class="fa rolls-toggle fa-angle-double-up"></i>
+    </header>
+    <p>{{site.description}}</p>
+  </div>
+  <div class="roll clearfix">
+    <img src="/assets/img/wechat_pay.png">
+    <header>支持 · 微信
+      <i class="fa rolls-toggle fa-angle-double-up"></i>
+    </header>
+    <p>写的还凑合，赏点零花钱</p>
+  </div>
+  <div class="roll clearfix">
+    <img src="/assets/img/alipay.png">
+    <header>支持 · 支付宝
+      <i class="fa rolls-toggle fa-angle-double-up"></i>
+    </header>
+    <p>写的还凑合，赏几个铜板</p>
+  </div>
+  <script>
+(function (){
+  var curr = 0;
+  var $parent = $('.module-author');
+  var $children = $parent.find('.roll')
+  $parent.find('.rolls-toggle').click(function () {
+    var $this = $(this)
+
+    $this.hide()
+    $children.css('transition', 'all .5s')
+    setTimeout(function(){
+      $children.css('transform', 'translate3d(0, -64px, 0)')
+      setTimeout(function(){
+        $children.css('transition', '')
+        setTimeout(function(){
+          $children.css('transform', '')
+          $parent.find('.roll:first').appendTo($parent)
+          $this.show()
+        })
+      }, 500)
+    })
+  })
+})();
+  </script>
+</section>

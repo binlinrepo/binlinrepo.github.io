@@ -1,0 +1,43 @@
+@import 'mixins';
+@import 'variables';
+
+body {
+  position: relative; /* for scroll spy with absolute position */
+  color: #333;
+  font-size: 15px;
+  @include sans;
+  -webkit-font-smoothing: antialiased;
+}
+
+a, a:hover, a:active, a:focus{
+  color: $blue;
+}
+
+.ias-spinner, .ias-noneleft{
+  margin-bottom: 30px;
+}
+
+.btn-hover{
+  @include link-hover($blue, white);
+  padding: 0.3em 1em;
+  font-size: 14px;
+}
+.btn-hover:hover{
+  background: $blue;
+}
+
+@media(min-width:768px){
+.container-fluid {
+padding: 0 30px;
+    margin: 0 auto;
+  }
+}
+
+.list-unstyled{
+  padding-left: 0px;
+  list-style: none;
+}
+
+.text-center{
+  text-align: center;
+}

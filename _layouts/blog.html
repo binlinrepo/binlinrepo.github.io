@@ -1,0 +1,43 @@
+---
+layout: default
+---
+
+<article class="module-blog">
+  <header class="blog-header">
+    <div class="container-fluid overlay">
+      <time class="pull-right">{{ page.date | date: "%Y/%m/%d" }}</time>
+      <h1>
+        {{page.title}}
+        {% if page.collection != "posts" %}
+        <a class="collection" href="/{{page.collection}}.html">{{page.collection}}</a>
+        {% endif %}
+      </h1>
+
+      <aside class="toc"></aside>
+
+      <p class="tag-list">
+        {% for tag in page.tags %}
+          <a class="tag" href="/tags.html#{{tag}}">{{tag}}</a>
+        {% endfor %}
+      </p>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="content">
+      <div class="md">
+        {{ content }}
+        <p>转载请注明来源： <a href="{{site.url}}{{page.url}}">{{site.url}}{{page.url}}</a> 欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 <a href="mailto: {{site.email}}">{{site.email}}</a>。</p>
+      </div>
+
+      <div class="hidden-xs">
+        {% include author.html %}
+      </div>
+      {% include post-pager.html %}
+	  {% include utteranc-comments.html %}
+    </div>
+  </div>
+  <script src="/assets/js/blog.js"></script>
+  {% include latex.html %}
+</article>
+

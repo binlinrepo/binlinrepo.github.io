@@ -1,0 +1,51 @@
+---
+layout: default
+---
+
+<div class="container-fluid module-index">
+  <div class="row">
+    <div class="content col-sm-8"> 
+      <div class="posts">
+        {% for post in paginator.posts %}
+        <div class="post">
+          <time>
+            <p class="day">{{post.date | date: '%d'}}</p>
+            <p class="month">{{post.date | date: '%Y, %b'}}</p>
+          </time>
+          <article>
+            <header>
+              <h1 class="title">
+                <a target="_blank" href="{{post.url}}">{{ post.title }}</a>
+              </h1>
+              <span class="tags">
+                {% for tag in post.tags %}
+                  <a class="tag" href="/tags.html#{{tag}}">{{tag}}</a>
+                {% endfor %}
+              </span>
+            </header>
+
+            <div class="md ">{{ post.excerpt }}</div>
+
+            <a class="more btn-hover pull-right" href="{{ post.url }}" target='_blank'> 继续阅读 </a>
+          </article>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if paginator.next_page %}
+        <a class="pager-next-url" href="{{ paginator.next_page_path }}"></a>
+      {% endif %}
+
+      {% include latex.html %}
+    </div>
+    <aside class="hidden-xs col-sm-3 col-sm-offset-1">
+      {% include author.html %}
+      <section class="tag-list">
+        <h4>标签</h4>
+      </section>
+    </aside>
+  </div>
+  <script src="/assets/lib/jquery-ias.min.js"></script>
+  <script src="/assets/js/index.js"></script>
+</div>
+

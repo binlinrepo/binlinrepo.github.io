@@ -1,0 +1,57 @@
+title: 生如夏花‘s Blog
+description: 生如夏花之绚烂
+url: https://binlinrepo.github.io
+
+#author:
+name: 生如夏花
+email: binlin.duan@foxmail.com
+
+logo: assets/img/favicon.ico
+keywords:
+##  - Web
+##  - HTML
+##  - CSS
+##  - JavaScript
+##  - C++
+##  - Linux
+##  - Bash
+##  - Vim
+
+permalink: /:year/:month/:day/:title.html
+paginate: 7
+paginate_path: "page:num"
+markdown: kramdown
+markdown_ext:  md
+excerpt_separator: "<!--more-->"
+highlighter: rouge
+lsi: false
+exclude: ['README.md', '.*', 'bin/', 'Gemfile', 'node_modules', '*.log', 'package.json']
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+baidu-analysis: '955746c69284dfaac1d7fe351622c266'
+sass:
+    style: compressed
+
+defaults:
+  -
+    scope:
+      path: "_drafts"
+    values:
+      layout: "blog"
+  -
+    scope:
+      path: "_posts"
+    values:
+      layout: "blog"
+
+plugins:
+  - jekyll-sitemap
+  - jekyll-feed
+  - jekyll-paginate
+  - jekyll-seo-tag
+  - jekyll-redirect-from
+
+whitelist:
+  - jekyll-redirect-from

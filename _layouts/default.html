@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html class="module-default {%if page.fullSize %}full-size{%endif%}">
+	<head> {% include head.html %} </head>
+  	<body id="body" >
+    	<div class="banner {% if page.bannerTransparent %}transparent{% endif %}">
+		  	<div class="container-fluid">
+		    	<nav class="pull-right">
+		      		<a class="glow no-decoration" href="/tags.html">标签</a>
+		      		<a class="glow no-decoration" href="/archive.html">归档</a>
+		      		<a class="glow no-decoration" href="/about.html">关于</a>
+		    	</nav>
+			    <a class="logo no-decoration" href="/">
+			      <span class="logo-land"><font color="#F73809"><b>生</b></font><font color="green"><b>如</b></font><font color="yellow"><b>夏</b></font><font color="blue"><b>花</b></font></span>
+			    </a>
+			</div>
+  	  	</div>
+    	<div class="site-content"> {{ content }} </div>
+
+		<a href="#body" id="scrolltop" class="animate">
+		  <span class="fa fa-chevron-up"></span>
+		</a>
+    	{% include footer.html %}
+		{% include scrolltop.html %}
+  </body>
+</html>
