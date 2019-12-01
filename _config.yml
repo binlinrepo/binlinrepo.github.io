@@ -21,14 +21,17 @@ permalink: /:year/:month/:day/:title.html
 paginate: 7
 paginate_path: "page:num"
 markdown: kramdown
+##markdown: redcarpet
+##redcarpet:
+##    extensions: [ "hard_wrap","autolink", "tables", "strikethrough", "superscript", "with_toc_data", "highlight", "prettify","no_intra_emphasis"]
 markdown_ext:  md
 excerpt_separator: "<!--more-->"
 highlighter: rouge
 lsi: false
 exclude: ['README.md', '.*', 'bin/', 'Gemfile', 'node_modules', '*.log', 'package.json']
 kramdown:
-  input: GFM
-  hard_wrap: false
+   input: GFM
+   hard_wrap: false
 
 baidu-analysis: '955746c69284dfaac1d7fe351622c266'
 sass:
@@ -37,14 +40,16 @@ sass:
 defaults:
   -
     scope:
-      path: "_drafts"
+        path: "_drafts"
     values:
-      layout: "blog"
+        layout: "blog"
   -
     scope:
-      path: "_posts"
+        path: "_posts"
     values:
-      layout: "blog"
+        layout: "blog"
+        author: "生如夏花"
+     
 
 plugins:
   - jekyll-sitemap
