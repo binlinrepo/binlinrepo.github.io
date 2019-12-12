@@ -1,10 +1,15 @@
+---
+title: C语言操作数据库
+tags: Database
+---
 # C语言操作数据库
 
 ## Access Database
 
 1. Access文件路径：`D:\Database1.accdb`，表结构如下图所示：<br/>![]({{site_url}}/assets/c-database/access.png)
+<!--more-->
 
-	```
+	```cpp
 	#include <stdio.h>
 	#include <Windows.h>
 	#include <sqlext.h>
