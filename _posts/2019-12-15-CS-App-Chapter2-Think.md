@@ -1,6 +1,7 @@
 ---
 title: 关于IEEE754定义的浮点数表示的一点思考
-tags: CS-APP
+tags: CS-APP IEEE754 浮点数 偏置
+category: CS-APP
 ---
 
 ## 浮点数定义

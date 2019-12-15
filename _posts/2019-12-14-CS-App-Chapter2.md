@@ -1,8 +1,7 @@
 ---
-title: CS-App 读书笔记（第二章）
-layout: blog
-tags: CS-APP
-description: 在不同的上下文中，一个同样的字节序列可能表示一个整数，浮点数，字符串或者机器指令。
+title: 信息的表示和处理（2）
+tags: CS-APP 整数编码 浮点数 IEEE754 二进制
+category: CS-APP
 ---
 ## 摘录
 

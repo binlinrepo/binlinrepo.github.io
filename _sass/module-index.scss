@@ -127,7 +127,7 @@ aside{
     li{
       margin-bottom: 10px;
       a{
-        @include link-hover(#777, $blue);
+        @include link-hover(#777, $grey);
       }
     } 
   }

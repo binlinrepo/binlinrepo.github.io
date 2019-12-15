@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
     text: '只有这些了~',
     html: '<div class="ias-noneleft" style="text-align: center;">{text}</div>'
   }))
-
+/*
   $.get('/api/tags.json').done(function (tags) {
     var tagEls = tags
     .sort(function (lhs, rhs) {
@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
     })
     $('.tag-list').append(tagEls)
   })
+*/
   var links = [{
     icon: 'fa-code-fork',
     url: 'https://github.com/binlinrepo/binlinrepo.github.io',

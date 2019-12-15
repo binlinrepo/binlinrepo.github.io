@@ -40,8 +40,22 @@ layout: default
     </div>
     <aside class="hidden-xs col-sm-3 col-sm-offset-1">
       {% include author.html %}
-      <section class="tag-list">
-        <h4>标签</h4>
+      <section class="collection-list">
+        <h4>目录</h4>
+		<ul class="list-unstyled">
+			<li>
+		      <span class="pull-right">{{site.categories.CS-APP | size}}</span>
+		      <a href="/category/cs-app.html"> CS-APP学习笔记 </a>
+		    </li>
+			<li>
+		      <span class="pull-right">{{site.categories["Ubuntu18.04"] | size}}</span>
+		      <a href="/category/ubuntu18.04.html"> Ubuntu18.04 </a>
+		    </li>
+			<li>
+		      <span class="pull-right">{{site.categories.Other | size}}</span>
+		      <a href="/category/other.html"> Other </a>
+		    </li>
+		</ul>
       </section>
     </aside>
   </div>
