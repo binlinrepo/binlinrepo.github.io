@@ -32,9 +32,14 @@ layout: default
         {% endfor %}
       </div>
 
-      {% if paginator.next_page %}
-        <a class="pager-next-url" href="{{ paginator.next_page_path }}"></a>
-      {% endif %}
+       <p class="pager">
+		  {% if paginator.previous_page %}
+		  <a class="btn-hover" href="{{paginator.previous_page_path}}">上一页</a>
+		  {% endif %}
+		  {% if paginator.next_page %}
+		  <a class="btn-hover pager-next-url" href="{{paginator.next_page_path}}">下一页</a>
+		  {% endif %}
+		</p>
 
       {% include latex.html %}
     </div>
@@ -59,7 +64,5 @@ layout: default
       </section>
     </aside>
   </div>
-  <script src="/assets/lib/jquery-ias.min.js"></script>
-  <script src="/assets/js/index.js"></script>
 </div>
 

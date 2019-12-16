@@ -23,13 +23,13 @@
 .article-list {
     display: flex;
     flex-wrap:wrap;
-    justify-content: space-between;
+    justify-content: flex-start;
   }
 
 article{
   flex: 48%;
   flex-grow: 0;
-  margin: 10px 0;
+  margin: 10px 10px;
   h3{
     margin-bottom: 10px;
     a{

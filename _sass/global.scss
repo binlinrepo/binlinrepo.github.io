@@ -7,6 +7,13 @@ body {
   font-size: 15px;
   @include sans;
   -webkit-font-smoothing: antialiased;
+  
+  .ellipsis{
+	  color: $light-grey;
+	  white-space: nowrap;
+	  overflow: hidden;
+	  text-overflow: ellipsis;
+	}
 }
 
 a, a:hover, a:active, a:focus{
