@@ -6,7 +6,7 @@ tags: Database
 
 ## Access Database
 
-1. Access文件路径：`D:\Database1.accdb`，表结构如下图所示：<br/>![]({{site_url}}/assets/c-database/access.png)
+1. Access文件路径：`D:\Database1.accdb`，表结构如下图所示：<br/>![]({{site_url}}/assets/blog/c-database/access.png)
 <!--more-->
 
 	```cpp
