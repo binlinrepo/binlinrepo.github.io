@@ -264,6 +264,27 @@ tags: CS-APP 习题解答
     * 2. 根据整数除法的定义，用非零数x除以p会得到商q和余数r，即$p=x*q+r$，且$\|r\| < \|x\|$。
     * 3. 假设$q=y$，那么有$x*y=x*y+r+t2^{w}$。在此，我们可以得到$r+t2^{w}=0$。但是$\|r\| < \|x\| \leq 2^{w}$，所以只有当$t=0$时，这个等式才会成立，此时$r=0$。
 
+* 2.36 见代码部分
+
+* 2.37 
+    * A. 虽然修改之后使用`uint_64`来保存数据，可以防止溢出，但是在作为malloc参数时，由于malloc的参数默认时size_t，所以又会强制转换为size_t，不能解决溢出导致的问题。
+    * B. 见代码部分。
+
+* 2.38 可以计算a的$2^{k}$（当b=0）和$2^{k}+1$（当b=a）倍。因此我们能够计算出倍数为1，2，3，4，5，8，9。
+
+* 2.39 左移n位之后，表达式便为-(x<<m)。
+
+* 2.40
+
+    | K | 移位 | 加法/减法 | 表达式 |
+    |:--|:-----|:----------|:-------|
+    | 6 | 2 | 1 | (x << 2) + (x <<1) |
+    | 31 | 1 | 1 | (x<<5)-x |
+    | -6 | 2 | 1 | (x<<1)- (x<<3) |
+    | 55 | 2 | 2 | (x<<6) - (x<<3) -x |
+
+* 2.41
+
 
 ## 代码部分
 
@@ -334,4 +355,27 @@ void reverse_array(int a[], int cnt){
         int sum=x+y;
         return !(x>0&&y>0&&sum<0)&&!(x<=0&&y<=0&&sum>0);
     }
+```
+
+* 2.36
+```cpp
+int tmulk_ok(int_32 x,int_32 y){
+    int_64 sum=(int_64)(x*y);
+    return sum==(int_32)sum;
+}
+```
+* 2.37-B
+
+```cpp
+void * copy_elements(void *ele_src[], int ele_cnt, size_t ele_size){
+    /*
+     * Allocate buffer for ele_cnt objects,each of ele_size bytes and copy from locations designated by ele_src
+     */
+     uint64_t sum = ele_cnt*ele_size;
+     if(sum!=(size_t)sum){
+        return NULL;
+     }
+     void * result =malloc(sum);
+     ...
+}
 ```
