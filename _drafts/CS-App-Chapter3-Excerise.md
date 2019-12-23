@@ -87,3 +87,19 @@ void decode1(long *xp, long *yp, long *zp){
     | `incq 16(%rax)` | 0x110 | 0x14 |
     | `decq %rcx` | %rcx | 0x0 |
     | `subq %rdx,%rax` | %rax | 0xFD |
+
+* 3.9	`shlq $0x04, %rax` `sarq %cl, %rax`
+
+* 3.10
+```cpp
+long arith2(long x, long y, long z){
+	long t1=x|y;
+	long t2=t1>>3;
+	long t3=~t2;
+	long t4=z-t3;
+}
+```
+* 3.11
+	* A. `xorq %rdx, %rdx`指令将寄存器`%rdx`置0
+	* B. 将寄存器`%rdx`设置为0的更直接的方法是用指令`movq $0, %rdx`。
+	* C. 
