@@ -103,3 +103,48 @@ long arith2(long x, long y, long z){
 	* A. `xorq %rdx, %rdx`指令将寄存器`%rdx`置0
 	* B. 将寄存器`%rdx`设置为0的更直接的方法是用指令`movq $0, %rdx`。
 	* C. 
+
+* 3.12
+```cpp
+void uremdiv(unsigned long x, unsigned long y, unsigned long *qp, unsigned long *rp){
+    unsigned long q = x/y;
+    unsigned long r = x%y;
+    *qp = q;
+    *rp = r;
+}
+```
+汇编代码如下：
+```
+	.file	"uremdiv.c"
+	.text
+	.globl	uremdiv
+	.type	uremdiv, @function
+uremdiv:
+.LFB0:
+	.cfi_startproc
+	movq	%rdi, %rax
+	movq	%rdx, %rdi
+	movl	$0, %edx
+	divq	%rsi
+	movq	%rax, (%rdi)
+	movq	%rdx, (%rcx)
+	ret
+	.cfi_endproc
+.LFE0:
+	.size	uremdiv, .-uremdiv
+	.ident	"GCC: (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
+	.section	.note.GNU-stack,"",@progbits
+```
+相对于由符号除法，只是将指令`cqto`改为`movl $0, %edx`
+
+* 3.13
+    * A. `typedef data_t int; #define COMP <`
+    * B. `typedef data_t short; #define COMP >=`
+    * C. `typedef data_t unsigned char; #define  COMP <=`
+    * D. `typedef data_t long; #define COMP !=`
+
+* 3.14
+    * A. `data_t`为`long`，`TEST`为`>=`
+    * B. `data_t`为`short,unsigned short`， `TEST`为`=`
+    * C. `data_t`为`unsigned char`，`TEST`为`>`
+    * D. `data_t`为`int, unsigned int`，`TEST`为`!=`

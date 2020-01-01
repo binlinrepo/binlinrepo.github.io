@@ -264,4 +264,124 @@ scale:
 
 左移指令有两个名`SAL,SHL`，效果是一样的，都是将右边补0。右移指令不同，SAR执行算术移位，而SHR执行逻辑移位。移位操作的目的操作数可以是一个寄存器或是一个内存位置。
 
+两个64位有符号或无符号整数相乘得到的乘积需要128位来表示。x86-64指令集对128位数的操作提供有限的支持，Intel将16字节的数称为**八字**。支持产生两个64位数字的全128位乘积以及除法的指令，如下图所示：<br/>![]({{site_url}}/assets/blog/csapp/ch3/3-12.png)
+
+`imulq`指令有两种不同的形式。其中一种是IMUL指令类中的一种。这种形式的`imulq`指令是一个“双操作数”乘法指令。它从两个64位操作数产生一个64位乘积，实现了$$*_{64}^{u}$$和$$*_{64}^{t}$$运算。另外一种是“单操作数”乘法指令，以计算两个64位值的全128位乘积，要求一个参数必须在寄存器`%rax`中，而另一个作为源操作数给出。然后乘积存放在寄存器`%rdx`（高64位）`%rax`（低64位）。
+```cpp
+#include <inttypes.h>
+
+typedef unsigned __int128 uint128_t;
+
+void store_uprod(uint128_t *dest, uint64_t x, uint64_t y ){
+    *dest=x*(uint128_t) y;
+}
+```
+汇编代码如下：
+```
+	.file	"mulq128.c"
+	.text
+	.globl	store_uprod
+	.type	store_uprod, @function
+store_uprod:
+.LFB4:
+	.cfi_startproc
+	movq	%rsi, %rax ;Copy x to multiplicand
+	mulq	%rdx ; Multiply by y
+	movq	%rax, (%rdi) ; Store lower 8 bytes at dest
+	movq	%rdx, 8(%rdi) ; Store upper 8 bytes at dest+8
+	ret
+	.cfi_endproc
+.LFE4:
+	.size	store_uprod, .-store_uprod
+	.ident	"GCC: (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
+	.section	.note.GNU-stack,"",@progbits
+```
+从上面的代码可以看出，`dest in %rdi,x in %rsi,y in %rdx`，存储乘积需要两个`movq`指令：一个存储低8个字节，一个存储高8个字节。由于生成这段代码针对是小端法机器，所以高位字节存储在大地址。
+
+由符号除法指令`idivl`将寄存器`%rdx`（高64位）和`%rax`（低64位）中的128位作为被除数，而除数作为指令的操作数给出。指令将商存储在寄存器`%rax`中，将余数存储在寄存器`%rdx`。
+
+对于大多数64位除法应用来说，被除数也常常是一个64位的值。这个值应该存放在`%rax`中，`%rdx`的位应该设置位全0（无符号除法）或者`%rax`的符号位（有符号数除法）。这个操作可以用`cqto`指令来完成。这条指令不需要操作数----它隐含读出`%rax`的符号位，并将它复制到`%rdx`的所有位。
+```cpp
+void remdiv(long x, long y, long *qp, long *rp){
+    long q=x/y;
+    long r=x%y;
+    *qp=q;
+    *rp=r;
+}
+```
+汇编结果如下：
+```
+	.file	"remdiv.c"
+	.text
+	.globl	remdiv
+	.type	remdiv, @function
+remdiv:
+.LFB0:
+	.cfi_startproc ; x in %rdi, y in %rsi, qp in %rdx, rp in %rcx
+	movq	%rdi, %rax ; Move x to lower 8 bytes of dividend
+	movq	%rdx, %rdi ; Move qp to %rdi
+	cqto               ; Sign-extend to upper 8 bytes of dividend
+	idivq	%rsi       ; Divide by y
+	movq	%rax, (%rdi) ; Store quotient at qp
+	movq	%rdx, (%rcx) ; Store remainder at rp
+	ret
+	.cfi_endproc
+.LFE0:
+	.size	remdiv, .-remdiv
+	.ident	"GCC: (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
+	.section	.note.GNU-stack,"",@progbits
+```
+在上面的代码中，首先准备被除数，并且符号扩展x，然后将qp保存在`%rdi`中，执行除法之后，将商保存在qp，将余数保存在rp中。
+
+## 控制
+
+机器代码提供两种基本的低级机制来实现有条件的行为：测试数据值，然后根据测试的结果改变控制流或者数据流
+
+用`jump`指令可以改变一组机器代码指令的执行顺序，`jump`指令指定控制应该被传递到程序的某个其他部分，可能是依赖于某个测试的结果。
+
+除了整数寄存器，CPU还维护这一组单个位的**条件码**寄存器，它们描述了最近的算术或逻辑操作的属性。可以检测这些寄存器来执行条件分支指令。
+
+CF：进位标志。最近的操作使最高位产生了进位。可用来检查无符号数操作的溢出
+
+ZF：零标志。最近的操作得出的结果是0。
+
+SF： 符号标志。最近的操作得到的结果为负数。
+
+OF：溢出标志。最近的操作导致一个补码溢出---正溢出或负溢出。
+
+`leaq`指令不改变任何条件码，因为它是用来进行地址计算的。
+
+`CMP`指令根据两个操作数之差来设置条件码，除了只设置条件码而不更新目的寄存器之外，`CMP`和`SUB`指令的结果时一样的。同样的指令还有`TEST`和`AND`。
+
+条件码通常不会直接读取，常用的方法有三种：1.可以根据条件码的某种组合，将一个字节设置为0或者1，2.可以条件跳转到程序的某个其他的部分，3.可以有条件地传送数据。
+
+如下图所示，根据条件码的某种组合，将一个字节设置为0或者1。<br/>![]({{site_url}}/assets/blog/csapp/ch3/3-14.png)我们将这一类指令称为`SET`指令；它们之间的区别就在于它们考虑的条件码的组合是什么，这些指令名字的不同后缀指明了它们所考虑条件码的组合。
+
+一个计算C语言表达式`a<b`的典型指令序列如下所示：
+``` 
+; a in %rdi, b in %rsi
+cmpq %rsi, %rdi ;Compare a:b
+setl %al ; Set low-order of %eax to 0 or 1
+movzbl %al, %eax ; Clear rest of %eax (and rest of %rax)
+ret
+```
+
+大多数情况下，机器代码对于有符号和无符号两种情况都使用一样的指令，这是因为许多算术运算对无符号和补码算术都有一样的位级行为。
+
+
+正常情况下，指令按照它们出现的顺序一条一条地执行。**跳转**指令会导致执行切换到程序中一个全新的位置。在汇编代码中，这些跳转的目的地通常用一个**标号**（label）指明。示例如下：
+```
+    movq $0, %rax ;Set %rax to 0
+    jmp .L1 ;Goto .L1
+    movq (%rax), %rdx ;Null pointer derefence (skipped)
+.L1:
+    popq %rdx ;Jump target
+```
+指令`jmp .L1`会导致程序跳过`movq`指令，而从`popq`指令开始执行。在产生目标代码文件时，汇编器会确定所有带标号指令的地址，并将跳转目标编码为跳转指令的一部分。
+
+`jmp`指令时无条件跳转。它可以是直接跳转，即跳转目标是作为指令的一部分编码的；也可以是间接跳转，即跳转目标是从寄存器或内存位置中读出的。在汇编语言中，直接跳转是给出一个标号作为跳转目标的。间接跳转的写法是“*”后面跟一个操作数指示符。例如`jmp *%rax or jmp *(%rax)`
+
+如图所示都是一些跳转指令<br/>![]({{site_url}}/assets/blog/csapp/ch3/3-15.png)表中所示的其他跳转指令都是有条件的---它们根据条件码的某种组合，或者跳转，或者继续执行代码序列中下一条指令。
+
+在汇编代码中，跳转目标用符号标号书写。汇编器，以及后来的链接器，会产生跳转目标跳转目标适当的编码。跳转指令有几种不同的编码，但是最常用都是PC相对的。也就是，它们会将目标指令的地址与紧跟在跳转指令后面那条指令的地址之间的差作为编码。这些地址偏移量可以编码为1，2，4个字节。第二种编码方法是给出绝对地址，用4个字节直接制定目标。
 
