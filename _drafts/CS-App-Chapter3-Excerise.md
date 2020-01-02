@@ -148,3 +148,10 @@ uremdiv:
     * B. `data_t`为`short,unsigned short`， `TEST`为`=`
     * C. `data_t`为`unsigned char`，`TEST`为`>`
     * D. `data_t`为`int, unsigned int`，`TEST`为`!=`
+
+* 3.15
+    * A. 4003fe
+    * B. 400425
+    * C. 400543 400545
+    * D. 400560
+
