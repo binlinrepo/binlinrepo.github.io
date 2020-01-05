@@ -155,3 +155,297 @@ uremdiv:
     * C. 400543 400545
     * D. 400560
 
+* 3.16
+    * A.
+    ```cpp
+    void cond(long a, long *p){
+        if(p==0)
+            goto done;
+        if(*p>a)
+            goto done;
+    done:
+        return;
+        
+    }
+    ```
+    * B. 第一个条件分支是&&表达式的一部分，如果对p为非空的测试失败，代码就会跳过`a>*p`的测试
+
+* 3.17 
+    * A.
+    ```cpp
+    long gotodiff_se(long x, long y){
+        long result;
+        if(x<y)
+            goto x_le_y;
+        ge_cnt++;
+        result=y-x;
+        return result;
+    x_le_y:
+        ln_cnt++;
+        result=y-x;
+        return result;
+    }
+    ```
+    * B. 在大多数情况下，可以在两种方式中任意选择。但是原来的方法对常见的没有`else`语句的情况更好一些。对于这种情况，我们只能简单的将翻译规则修改如下：
+    ```cpp
+    t=test-expr;
+    if(!t)
+        goto done;
+    then-statement
+    done:
+    ```
+    所以基于这种代替规则的翻译更麻烦一些。
+
+* 3.18
+    ```cpp
+    long test(long x, long y, long z){
+        long val=x+y+z;
+        if(x<-3){
+            if(y<z){
+                val=x*y;
+            }else{
+                val=y*z;
+            }
+        }else if(x>2){
+            val=x*z;    
+        }
+        return val;
+    }
+    ```
+
+* 3.19
+    * A. $T_{MP}=2(31-16)=30$
+    * B. $T_{MP}+T_{OK}=30+16=46$
+    
+* 3.20 
+    * A. `#define OP /`
+    * B. 
+    ```
+    ;long arith(long x)
+    ;x in %rdi
+    arith:
+        leaq 7(%rdi), %rax  ;将x+7保存在%rax
+        testq %rdi, %rdi    ;测试x是正数，负数或0
+        cmovns %rdi, %rax   ;如果x是非负数，将x保存在%rax
+        sarq $3, %rax       ;将x算术右移3位。这个是作除法运算，当x为负数时，7为偏置量。
+        ret
+    ```
+
+* 3.21
+```cpp
+long test(long x,long y){
+    long val=x*8;
+    if(y>0){
+        if(x>=y){
+            val=x&y;
+        }else
+            val=y-x;
+    }else if(y<=-2){
+        val=x+y;
+    }
+    return val;
+}
+
+* 3.22
+    * A. `n=13`时会发生溢出，最大的n值为12
+    * B. long型，`n=20`才会发生溢出，最大的n值为19
+
+* 3.21
+    * A. `x in %rdi, y in %rcx, n in %rdx`
+    * B. 编译器认为指针p总是指向x，因此表达式`(*p)++`就能够实现x+1。代码`leap 1(%rcx,%rdi), %rax`，把这个加1和加y组合起来。
+    * C. 
+    ```
+    ;long dw_loop(long x)
+    ;x initially in %rdi
+    dw_loop:
+        movq %rdi, %rax     ;将x保存在%rax中
+        movq %rdi, %rcx     ;将x保存在%rcx中
+        imulq %rdi, %rcx    ;计算x*x保存在%rcx中，即y
+        leaq (%rdi,%rdi), %rdx  ;计算x+x保存在%rdx中，即n
+    .L2:
+        leaq 1(%rcx,%rax), %rax ;计算x+y+1保存在%rax中
+        subq $1, %rdx           ;n-1
+        testq %rdx, %rdx        ;检测n是否大于0
+        jg .L2                  ;n>0时跳转到L2
+        rep; ret
+    ```
+
+* 3.24
+```cpp
+long loop_while(long a, long b){
+    long result=1;
+    while(a<b){
+        result*=(a+b);
+        a++;
+    }
+    return result
+}
+```
+
+* 3.25
+```cpp
+long loop_while2(long a,long b){
+    long result=b;
+    while(b>0){
+        result=result*a;
+        b=b-a;
+    }
+    return result;
+}
+```
+
+* 3.26
+    * A. 可以看到这段代码使用的时跳转到中间翻译方法，在第3行使用无条件跳转指令`jmp`
+    * B. 下面是原始的C代码：
+    ```cpp
+    long func_a(unsigned long x){
+        long val=0;
+        while(x!=0){
+            val=val^x;
+            x>>=1;
+        }
+        return val&0x1;
+    }
+    ```
+    * C. 这个代码计算参数x的奇偶性。也就是，如果x中有奇数个1，就返回1，如果由偶数个1，就返回0。
+
+* 3.27
+```cpp
+long fact_for_while(long n){
+    long i=2;
+    long result=1;
+    while(i<=n){
+        result*=i;
+        i++;
+    }
+    return result;
+}
+
+long fact_for_guarded_do(long n){
+    long i=2;
+    long result=1;
+    if(i>n)
+        goto done;
+loop:
+    result*=i;
+    i++;
+    if(i<=n)
+        goto loop;
+done:
+    return result;
+}
+```
+
+* 3.28
+    * A.
+    ```cpp
+    long fun_b(unsigned long x){
+        long val=0;
+        long i;
+        for(i=64;i!=0;i--){
+            val=(val<<1)|(x&0x1);
+            x>>=1;
+        }
+    }
+    ```
+    * B. 这段代码使用guarded-do变换生成的，但是编译器发现因为i初始化成了64，所以一定会满足测试`i!=0`，因此初始的测试是没有必要的。
+    * C. 这段代码把x中的位反过来，创造一个镜像。实现的方法是：将x的位从左向右移，然后在填入这些位，就像是把val从右向作移。
+
+* 3.29
+    * A. 这段代码是死循环
+    * B. 
+
+* 3.30
+    * A. 标号为-1，0，1，2，4，5，7
+    ```
+    .L4:
+        .quad   .L9 -1
+        .quad   .L5 0
+        .quad   .L6 1
+        .quad   .L7 2
+        .quad   .L2 3
+        .quad   .L7 4
+        .quad   .L8 5
+        .quad   .L2 6
+        .quad   .L5 7
+    ```
+    * B. 目标为.L5的清卡ung标号为0和7，目标为.L7的标号为2和4。
+
+* 3.31
+```cpp
+void switcher(long a, long b, long c, long *dest){
+    long val;
+    switch(a){
+        case 5:
+            c=b^0x15;
+        case 0:
+            a=c+112;
+            break;
+        case 2:
+        case 7:
+            a=(c+b)<<4;
+            break;
+        case 4:
+            *dest=a;
+            break;
+        default: 
+            val=b;
+    }
+    *dest=val;
+}
+```
+
+* 3.32
+
+| 标号 | PC | 指令 | %rdi | %rsi | %rax | %rsp | \*%rsp | 描述 |
+| M1 | 0x400560 | callq | 10 | - | - | 0x7fffffffe820 | - | 调用`first(10)` |
+| F1 | 0x400548 | lea | 10 | - | - | 0x7fffffffe818 | 0x400565 | 进入`first` |
+| F2 | 0x40054c | sub | 10 | 11 | - | 0x7fffffffe818 | 0x400565 |  |
+| F3 | 0x400550 | call | 9 | 11 | - | 0x7fffffffe818 | 0x400565 | 调用`last(9,11)` |
+| L1 | 0x400540 | mov | 9 | 11 | - | 0x7fffffffe810 | 0x400555 | 进入`last` |
+| L2 | 0x400543 | imul | 9 | 11 | 9 | 0x7fffffffe810 | 0x400555 | |
+| L3 | 0x400547 | ret | 9 | 11 | 99 | 0x7fffffffe810 | 0x400555 | 从`last`返回99 |
+| F4 | 0x400555 | ret | 9 | 11 | 99 | 0x7fffffffe818 | 0x400565 | 从`first`返回99 |
+| M2 | 0x400565 | mov | 9 | 11 | 99 | 0x7fffffffe820 | - | 继续执行main|
+
+* 3.33  `a,b,u,v`或`b,a,v,u`
+
+* 3.14
+    * A. 可以看到第9～14行将局部值a0～a5分别保存在被调用者保存寄存器%rbx，%r15，%r14，%r13，%12和%rbp。
+    * B. 局部值a6和a7存放在栈上相对于栈指针偏移量为0和8的地方。
+    * C. 在存储完6个局部变量之后，这个程序用完了所有的被调用者保存寄存器，所以剩下的两个值保存在栈上。
+
+* 3.35
+    * A. 寄存器%rbx中保存参数x的值，所以它可以被用来计算结果表达式。
+    * B.
+    ```cpp
+    long rfun(unsinged long x){
+        if(x==0)
+            return 0;
+        unsigned long nx=x>>4;
+        long rv=rfun(nx);
+        return x+rv;
+    }
+    ```
+
+* 3.36
+
+| 数组 | 元素大小 | 整个数组的大小 | 起始地址 | 元素i |
+|:-----|:---------|:---------------|:---------|:------|
+| S | 2 | 14 | $x_S$ | $x_s + 2i$ |
+| T | 8 | 24 | $x_T$ | $x_T + 8i$ |
+| U | 8 | 48 | $x_U$ | $x_U + 8i$ |
+| V | 4 | 32 | $x_V$ | $x_V + 4i$ |
+| W | 8 | 32 | $x_W$ | $x_W + 8i$ |
+
+* 3.37
+
+| 表达式 | 类型 | 值 | 汇编代码 |
+|:-------|:-----|:---|:---------|
+| `S+1` | short\* | $x_S+2$ | `leaq 2(%rdx), %rax` |
+| `S[3]` | short | $M[x_S+6]$ | `movw 6(%rdx), %rax` |
+| `&S[i]` | short\* | $x_S+2i$ | `leaq (%rdx,%rcx,2), %rax` |
+| `S[4*i+1]` | short | $x_S+8\*i+2$ | `movw 2(%rdx,%rcx, 8), %ax`|
+| `S+i-5` | short\* | $x_s+2i-10$ | `leaq -10(%rdx,%rcx,2), %rax` |
+
+* 3.38 对矩阵P的引用是在字节偏移$8\*(7i+j)$，而对矩阵Q的引用是在字节偏移$8\*(i+5j)$。由此可以确定P有7列，而Q由5列，得到M=5和N=7。
