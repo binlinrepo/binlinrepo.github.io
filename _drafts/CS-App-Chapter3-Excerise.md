@@ -449,3 +449,129 @@ void switcher(long a, long b, long c, long *dest){
 | `S+i-5` | short\* | $x_s+2i-10$ | `leaq -10(%rdx,%rcx,2), %rax` |
 
 * 3.38 对矩阵P的引用是在字节偏移$8\*(7i+j)$，而对矩阵Q的引用是在字节偏移$8\*(i+5j)$。由此可以确定P有7列，而Q由5列，得到M=5和N=7。
+
+* 3.39 这些计算是公式（3.1）的直接应用：
+    * 对于L=4，C=16和j=0，指针Aptr等于$x_A+4\*(16i+0)=x_A+64i$;
+    * 对于L=4，C=16，i=0，j=k，指针Bptr等于$x_B+4\*(16*0+k)=x_B+4k$;
+    * 对于L=4，C=16，i=16和j=k，Bend等于$x_B+4\*(16\*16+k)=x_B+1024+4k$。
+
+* 3.40
+```cpp
+void fix_set_diag_opt(fix_matrix A, int val){
+    int *Aptr=&A[0][0];
+    int *Bend=&A[N][N];
+    while(Aptr!=Bend){
+        *Aptr=val;
+        Aptr++;
+        Aptr+=N;
+    }
+}
+```
+或者
+```cpp
+void fix_set_diag_opt(fix_matrix A, int val){
+    int *Abase=&A[0][0];
+    long i=0;
+    long iend = N*(N+1);
+    do{
+        Abase[i]=val;
+        i+=N+1;
+    }while(i!=iend);
+}
+```
+
+* 3.41
+    * A. 
+
+    | 名称 | 偏移量 |
+    |:-----|:------|
+    | p | 0 |
+    | s.x | 8 |
+    | s.y | 12 |
+    | next | 16 |
+    * B. 这个结构总共需要24个字节
+    * C. 
+    ```cpp
+    void sp_init(struct prob *sp){
+        sp->s.x=sp->s.y;
+        sp->p=&(sp->s.x);
+        sp->next=sp->p;
+    }
+    ```
+
+* 3.42
+    * A. 
+    ```cpp
+    struct ELE{
+        long v;
+        struct ELE *p;
+    }
+    long fun(struct ELE * ptr){
+        long ret=0;
+        if(prt!=NULL){
+            ret+=ptr->v;
+            ptr=ptr->p;
+        }
+        return ret;
+    }
+    ```
+    * B. 该结构事项的数据结构是链表，fun按顺序返回链表所有值得和。
+
+* 3.43
+
+| expr | type | 代码 |
+|:-----|:-----|:---- |
+| up->t1.u | long | `movq (%rdi),%rax`<br/>`movq %rax,(%rsi)` |
+| up->t1.v | short | `movw 8(%rdi),%ax`<br/>`movw %ax,(%rsi)` |
+| &up->t1.w | char* | `leaq 10(%rdi),(%rsi)` |
+| up->t2.a | int* | `leaq (%rdi), (%rsi)` |
+| up->t2.a[up->t1.u] | int | `movq (%rdi),%rax`<br/>`movl (%rdi,%rax,4), %eax`<br/>`movl %eax, (%rsi)` |
+| *up->t2.p | char | `movq 8(%rdi), %rax`<br/>`movb (%rax), %al`<br/>`movb %al,(%rsi)` |
+
+* 3.44
+    * A.
+
+    | i | c | j | d | 总字节 | 对齐字节 |
+    |:--|:--|:--|:--|:------|:---------|
+    | 0 | 4 | 8 | 12 | 16 | 4 |
+    * B.
+
+    | i | c | d | j | 总字节 | 对齐字节 |
+    |:--|:--|:--|:--|:------|:---------|
+    | 0 | 4 | 5 | 8 | 16 | 8 |
+
+    * C.
+    | w | c | 总字节 | 对齐字节 |
+    |:--|:--|:-------|:---------|
+    | 0 | 6 | 10 | 2 |
+    * D.
+
+    | w | c | 总字节 | 对齐字节 |
+    |:--|:--|:------|:---------|
+    | 0 | 16 | 40 | 8 |
+    * E.
+    
+    | a | t | 总字节 | 对齐字节 |
+    |:--|:--|:-------|:--------|
+    | 0 | 24 | 40 | 8 |
+
+* 3.45
+    * A. 
+
+    | a | b | c | d | e | f | g | h |
+    |:--|:--|:--|:--|:--|:--|:--|:--|
+    | 0 | 8 | 16 | 24 | 28 | 32 | 40 | 48 |
+    * B. 56字节
+    * C. 
+    ```cpp
+    struct {
+        char *a; //0
+        char d; //8
+        char f; //9
+        short b; //10
+        float e; //12
+        double c; //16
+        long g; //24
+        int h; //32
+    }rec; //总字节数40
+    ```
