@@ -1,6 +1,6 @@
 ---
 title: 程序的机器级表示（3）
-category: CS-APP
+category: CS-APP AT&T 汇编语言 GCC
 tags: CS-APP
 ---
 
@@ -988,6 +988,7 @@ int main(){
 
 
 ## 浮点代码
+**书中的代码和使用gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04) 环境编译生成的代码结果不一致**
 
 处理器的**浮点体系结构**包括多个方面，会影响对浮点数数据操作的程序如何被映射到机器上，包括：
 
@@ -1031,4 +1032,73 @@ float_mov:
 vcvtsi2sdq %rax, %xmm1, %xmm1
 ```
 这条指令从寄存器%rax读取一个长整数，把它转换成数据类型double，并把结果存放进XMM寄存器%xmm1的低字节中。
+
+把单精度数转换成双精度数，GCC生成的代码如下
+```
+;Conversion from single to double precision
+vunpcklps %xmm0, %xmm0, %xmm0 
+vcvtps2pd %xmm0, %xmm0
+```
+
+`vunpcklps`指令通常用来交叉放置来自两个XMM寄存器的值，把它们存储到第三个寄存器中。也就是说，如果一个源寄存器的内容为字$[s_3,s_2,s_1,s_0]$，另一个源寄存器为字$[d_3,d_2,d_1,d_0]$，那么目的寄存器的值会是$[s_1,d_1,s_0,d_0]$。
+
+`vcvtps2pd`指令会把源XMM寄存器中的两个低位单精度值扩展成目的XMM寄存器中的两个双精度值。
+
+对于把双精度转换成成单精度，GCC会产生类似的代码：
+```
+;Convertsion from double to single precision
+vmovddup %xmm0, %xmm0
+vcvtpd2psx %xmm0, %xmm0
+```
+假设上面这些指令执行前寄存器%xmm0保存这两个双精度值$[x_1,x_0]$。然后`vmovddup`指令把它设置为$[x_0,x_0]$。`vcvtpd2psx`指令把这两个值转换成单精度，再存放到该寄存器的低位一半中，并将高位一半设置为0，得到结果$[0.0, 0.0, x_0, x_0]$。
+
+```cpp
+fcvt.c:
+double fcvt(int i, float *fp, double *dp, long *lp){
+    float f=*fp; double d=*dp; long l=*lp;
+    *lp=(long)d;
+    *fp=(float)i;
+    *dp=(double)l;
+    return (double)f;
+}
+```
+汇编代码如下:
+```
+	.file	"fcvt.c"
+	.text
+	.globl	fcvt
+	.type	fcvt, @function
+fcvt:
+.LFB0:
+	.cfi_startproc
+	movss	(%rsi), %xmm0
+	movq	(%rcx), %rax
+	cvttsd2siq	(%rdx), %r8
+	movq	%r8, (%rcx)
+	pxor	%xmm1, %xmm1
+	cvtsi2ss	%edi, %xmm1
+	movss	%xmm1, (%rsi)
+	pxor	%xmm1, %xmm1
+	cvtsi2sdq	%rax, %xmm1
+	movsd	%xmm1, (%rdx)
+	cvtss2sd	%xmm0, %xmm0
+	ret
+	.cfi_endproc
+.LFE0:
+	.size	fcvt, .-fcvt
+	.ident	"GCC: (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
+	.section	.note.GNU-stack,"",@progbits
+```
+
+
+在x86-64中，XMM寄存器用来向函数传递浮点参数，以及从函数返回浮点值。
+
+> XMM寄存器%xmm0~%xmm7最多可以传递8个浮点参数。按照参数列出的顺序使用这些寄存器。可以通过栈传递额外的浮点参数。
+
+> 函数使用寄存器%xmm0返回浮点值
+
+> 所有的XMM寄存器都是调用者保存的。被调用者可以不用保存就覆盖这些寄存器中的任意一个。
+
+当函数包含指针，整数和浮点数混合的参数时，指针和整数通过通用寄存器传递，而浮点值通过XMM寄存器传递。
+
 

@@ -606,3 +606,66 @@ void fix_set_diag_opt(fix_matrix A, int val){
 * 3.48
     * A. 对于没有保护的代码，第4行和第5行分别计算v和buf的地址相对于%rsp的偏移量分别为24和0。而有保护的代码，金丝雀值北方在偏移量为40的地方，而v和buf在偏移量为8和16的地方。
     * 在有保护的代码中，局部变量v比buf更靠近栈顶，因此buf溢出就不会破坏v的值。
+
+* 3.50
+    * 第4和5行，取出位于dp中的值，转换成int，在存储代ip中。因此可以推断出val1是d。
+    * 第6和7行，取出位于ip中的值，转换成float，在存储到fp中。因此可以推断出val2是i。
+    * 同理val3是l，val4是f。
+
+* 3.51
+
+| $T_x$ | $T_y$ | 指令 |
+|:------|:------|:-----|
+| long | double | `vcvtsi2sdq %rdi, %xmm0` |
+| double | int | `vcvttsd2si %xmm0, %eax` |
+| double | float | `vunpcklpd %xmm0, %xmm0, %xmm0`&`vcvtpd2ps %xmm0, %xmm0` |
+| long | float | `vcvtsi2ssq %rdi, %xmm0,%xmm0` |
+| float | long | `vcvttss2siq %xmm0, %rax` |
+
+* 3.52
+    * A. `double g1(double a, long b, float c, int d)` a in %xmm0, b in %rdi, c in %xmm1, d in %esi
+    * B. `double g2(int a, double *b, float *c, long d)` a in %edi, b in %rsi, c in %rdx, d in %rcx
+    * C. `double g3(double *a, double b, int c, float d)` a in %rdi, b in %xmm0, c in %esi, d in %xmm1
+    * D. `double g4(float a, int *b, float c, double d)` a in %xmm0, b in %rdi, c in %xmm1, d in %xmm2
+
+* 3.53 通过调用的寄存器可以看出有两个整形参数，两个浮点数参数。
+```
+funct1:
+    vcvtsi2ssq %rsi, %xmm2, %xmm2       ;
+    vaddss %xmm0, %xmm2, %xmm0          ;可以得知%rsi和%xmm0是q和r，但是具体对应位置不确定
+    vcvtsi2ss %edi, %xmm2, %xmm2        ;将int型转换为float，p in %edi，故 int p。
+    vdivss %xmm0, %xmm2, %xmm0          ;由除法指令可以得知p in %xmm2
+    vunpcklps %xmm0, %xmm0, %xmm0       
+    vcvtps2pd %xmm0, %xmm0              ;需要将除法结果转换为双精度来作减法，s in %xmm1， 故double s。
+    vsubd %xmm1, %xmm0, %xmm0
+    ret
+```
+所以结果为`double funct1(int p, float q, long r, double s)`或`double funct1(int p, long q, float r, double s)`
+
+* 3.54
+```cpp
+double funct2(double w, int x, float y, long z){
+    return x*y-w/z
+}
+```
+
+* 3.55 .LC3处，我们看到两个值分别为0和1077936128(0x40400000)。从高位字节可以抽取指数字段0x404(1028)，减去偏移量1023得到指数为5。连接两个值的小数位，得到小数字段为0，加上隐含的开头的1，得到1.0。因此这个常数是$1.0x2^{5}=32.0$。
+
+* 3.56
+    * A. 在此可以看到从地址.LC1开始的16个字节是一个掩码，它的低8个字节是全1，除了最高位，这是双精度值的符号位。计算这个掩码和%xmm0的AND值时，会清除x的符号位，得到绝对值。
+    * B. 可以看到`vxorpd`指令将整个寄存器设置为0，所以这是一种产生浮点常数0.0的方法。。
+    * C. 可以从地址.LC2开始的16个字节是一个掩码，它只有一个1位，位与XMM寄存器中低位数值的符号位。计算这个掩码与%xmm0的EXCLUSIVE—OR值时，会改变x的符号位，计算表达式-x。
+
+* 3.57
+```cpp
+double funct3(int *ap, double b, long c, float *dp){
+    if(*ap<b){
+        ret c*(*dp);
+    }else{
+        return c+2*d;
+    }
+}
+```
+
+
+
